@@ -31,7 +31,7 @@ def extract_flight_info(page_html, flight_date, formatted_date):
 
     return flights
 
-def run_airprishtina_ticket_script():
+def run_airprishtina_ticket_script_30days():
     airport_pairs = [
         ('Pristina', 'Basel-Mulhouse'),
         ('Pristina', 'Stuttgart'),
@@ -52,7 +52,7 @@ def run_airprishtina_ticket_script():
     }
     with sync_playwright() as p:
 
-        browser = p.chromium.launch(headless=False)  # Set to True to run headlessly
+        browser = p.chromium.launch(headless=True)  # Set to True to run headlessly
         context = browser.new_context(
                     user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
                     extra_http_headers={
@@ -148,4 +148,4 @@ def run_airprishtina_ticket_script():
     browser.close()
 
 if __name__ == "__main__":
-    run_airprishtina_ticket_script()
+    run_airprishtina_ticket_script_30days()
