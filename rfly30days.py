@@ -50,7 +50,7 @@ def extract_flight_info(page_html):
     
     return flights
 
-def main():
+def run_flyrbp_ticket_script_30days():
     airport_pairs = [
         ('MLH', 'PRN'),
         ('PRN', 'DUS'),
@@ -68,7 +68,7 @@ def main():
     }
 
     with sync_playwright() as p:
-           browser = p.chromium.launch(headless=False)  # Set to True to run headlessly
+           browser = p.chromium.launch(headless=True)  # Set to True to run headlessly
            context = browser.new_context(
                user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
                extra_http_headers={
@@ -135,4 +135,4 @@ def main():
     return {"status": "success", "message": "Flyrbp ticket script executed"}
 
 if __name__ == "__main__":
-    main()
+    run_flyrbp_ticket_script_30days()
