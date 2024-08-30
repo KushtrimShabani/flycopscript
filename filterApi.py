@@ -5,14 +5,20 @@ from concurrent.futures import ThreadPoolExecutor
 import os
 import psycopg2
 import time
+from airprishtina30days import run_airprishtina_ticket_script_30days
 from flask import Flask, jsonify, request
 import logging
 from airpristina import run_airprishtina_ticket_script
 from ark import run_arkpy_ticket_script
+from ark30days import run_arkpy_ticket_script_30days
 from flyska import run_flyska_ticket_script
+from flyska30days import run_flyska_ticket_script_30days
 from kosfly import run_kosfly_ticket_script
+from kosfly30 import run_kosfly_ticket_script_30days
 from prishtinaticket import run_prishtina_ticket_script
+from prishtinaticket30days import run_prishtina_ticket_script_30days
 from rfly import run_flyrbp_ticket_script
+from rfly30days import run_flyrbp_ticket_script_30days
 
 
 logging.basicConfig(level=logging.INFO)
@@ -39,7 +45,7 @@ except Exception as e:
 
 @app.route('/')
 def index():
-    return f'DATABASE_URL is: {DATABASE_URL}'
+    return f'Python is running.'
 
 def query_db(query, args=(), one=False):
     try:
@@ -74,6 +80,32 @@ def run_scripts():
     try:
         # Start running the scripts in a background thread
         threading.Thread(target=run_all_scripts).start()
+
+        # Return response immediately
+        return jsonify({'message': 'Scripts started'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/script-30days', methods=['GET'])
+def run_scripts_30days():
+    def run_all_scripts_30days():
+        # List of script functions to run
+        scripts_30days = [
+            run_flyska_ticket_script_30days,
+            run_kosfly_ticket_script_30days,
+            run_arkpy_ticket_script_30days,
+            run_flyrbp_ticket_script_30days,
+            run_prishtina_ticket_script_30days,
+            run_airprishtina_ticket_script_30days
+        ]
+        # Run each script sequentially with a delay
+        for script in scripts_30days:
+            run_script_in_thread(script)
+            time.sleep(30)  # Adjust the delay as needed
+
+    try:
+        # Start running the scripts in a background thread
+        threading.Thread(target=run_all_scripts_30days).start()
 
         # Return response immediately
         return jsonify({'message': 'Scripts started'}), 200
@@ -136,10 +168,6 @@ def fetch_price_differences():
 
     return jsonify(results)
 
-@app.route('/scrape_flights', methods=['GET'])
-def scrape_flights_endpoint():
-    flights = scrape_flights()
-    return jsonify(flights)
 
 @app.route('/flights', methods=['GET'])
 def get_all_flights():
@@ -408,4 +436,4 @@ def get_flights_grouped_by_website():
 
     
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=5001)
