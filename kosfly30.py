@@ -62,7 +62,7 @@ def extract_flight_info(page_html, target_date):
     
     return flights
 
-def run_kosfly_ticket_script():
+def run_kosfly_ticket_script_30days():
     airport_pairs = [
         ('PRN', 'DUS'),
         ('DUS', 'PRN'),
@@ -72,7 +72,7 @@ def run_kosfly_ticket_script():
     all_flights = []
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False)  # Set to True to run headlessly
+        browser = p.chromium.launch(headless=True)  # Set to True to run headlessly
         context = browser.new_context(
             user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
             extra_http_headers={
@@ -154,4 +154,4 @@ def run_kosfly_ticket_script():
     return {"status": "success", "message": "Flyrbp ticket script executed"}
 
 if __name__ == "__main__":
-    flights = run_kosfly_ticket_script()
+    flights = run_kosfly_ticket_script_30days()
