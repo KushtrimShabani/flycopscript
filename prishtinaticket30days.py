@@ -1,11 +1,13 @@
 from datetime import datetime, timedelta
 import psycopg2
 import random
+import subprocess
 import time
 from playwright.sync_api import sync_playwright
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 import requests
+from database import save_flights
 
 load_dotenv()
 
@@ -114,20 +116,19 @@ def run_prishtina_ticket_script():
         'Basel/Mulhouse (MLH)':'BSL'
     }
 
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False)
-        context = browser.new_context(
-                user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-                extra_http_headers={
-                    'Accept-Language': 'en-US,en;q=0.9',
-                    'Connection': 'keep-alive',
-                    'DNT': '1',
-                }
-            )
-        page = context.new_page()
-        for departure, arrival in airport_pairs:
-            for day in range(7,30 ,6 ):
-                   
+    for departure, arrival in airport_pairs:
+        for day in range(0, 2):
+            with sync_playwright() as p:
+                browser = p.chromium.launch(headless=True)
+                context = browser.new_context(
+                    user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                    extra_http_headers={
+                        'Accept-Language': 'en-US,en;q=0.9',
+                        'Connection': 'keep-alive',
+                        'DNT': '1',
+                    }
+                )
+                page = context.new_page()
                 url = 'https://www.prishtinaticket.net'
                 page.goto(url)
                 random_sleep(2, 3)
@@ -189,7 +190,7 @@ def run_prishtina_ticket_script():
                         
                 else:  
                     print("No flights found for the specified date.")
-        browser.close()
+                browser.close()
     
     return {"status": "success", "message": "Prishtina ticket script executed"}
 
