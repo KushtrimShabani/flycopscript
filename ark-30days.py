@@ -45,7 +45,7 @@ def extract_flight_info(page_html, target_date):
             flights.append(flight)
     
     return flights
-def run_arkpy_ticket_script():
+def run_arkpy_ticket_script_30days():
     airport_pairs = [
         ('MLH', 'PRN'),
         ('PRN', 'DUS'),
@@ -148,4 +148,4 @@ def run_arkpy_ticket_script():
     browser.close()
     return {"status": "success", "message": "Flyrbp ticket script executed"}
 if __name__ == "__main__":
-    run_arkpy_ticket_script()
+    run_arkpy_ticket_script_30days()
