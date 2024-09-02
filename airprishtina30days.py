@@ -31,16 +31,16 @@ def extract_flight_info(page_html, flight_date, formatted_date):
 
     return flights
 
-def run_airprishtina_ticket_script_30days():
+def run_airprishtina_ticket_script():
     airport_pairs = [
-        ('Pristina', 'Basel-Mulhouse'),
-        ('Pristina', 'Stuttgart'),
-        ('Pristina', 'Düsseldorf'),
-        ('Pristina', 'München'),
-        ('Düsseldorf', 'Pristina'),
-        ('München', 'Pristina'),
-        ('Stuttgart', 'Pristina'),
-        ('Basel-Mulhouse', 'Pristina')
+        ('Pristina', 'Basel-Mulhouse', True),
+        ('Pristina', 'Stuttgart', True),
+        ('Pristina', 'Düsseldorf', True),
+        ('Pristina', 'München', True),
+        ('Pristina', 'Basel-Mulhouse', False),
+        ('Pristina', 'Stuttgart', False),
+        ('Pristina', 'Düsseldorf', False),
+        ('Pristina', 'München', False),
         
     ]
     city_to_airport_code = {
@@ -64,7 +64,7 @@ def run_airprishtina_ticket_script_30days():
         page = context.new_page()
 
 
-        for departure, arrival in airport_pairs:
+        for departure, arrival, reversed in airport_pairs:
              for day in range(8,30):
              
                 url = 'https://www.airprishtina.com/sq/'
@@ -85,6 +85,11 @@ def run_airprishtina_ticket_script_30days():
                 page.fill('input#txt_Flight1To', arrival)
                 random_sleep(1)
                 page.locator(f'[data-text="{arrival}"]').click()
+                random_sleep(1)
+                if reversed:
+                    swap_icon = page.locator('#pnl_Flight1DestinationSwap[data-flight-order="1"] i.fas.fa-sync')
+                    swap_icon.click()
+                    print("Clicked the swap button as 'reversed' is true.")
                 random_sleep(1)
                 # Get the target date in the required format
                 target_date_obj = (datetime.now() + timedelta(days=day)).strftime('%Y-%m-%d')
@@ -148,4 +153,4 @@ def run_airprishtina_ticket_script_30days():
     browser.close()
 
 if __name__ == "__main__":
-    run_airprishtina_ticket_script_30days()
+    run_airprishtina_ticket_script()
