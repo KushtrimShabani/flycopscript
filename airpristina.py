@@ -1,6 +1,4 @@
 from datetime import datetime, timedelta
-import json
-import os
 import random
 import time
 from playwright.sync_api import sync_playwright
@@ -35,14 +33,14 @@ def extract_flight_info(page_html, flight_date):
 
 def run_airprishtina_ticket_script():
     airport_pairs = [
-        ('Pristina', 'Basel-Mulhouse'),
-        ('Pristina', 'Stuttgart'),
-        ('Pristina', 'Düsseldorf'),
-        ('Pristina', 'München'),
-        ('Düsseldorf', 'Pristina'),
-        ('München', 'Pristina'),
-        ('Stuttgart', 'Pristina'),
-        ('Basel-Mulhouse', 'Pristina')
+        ('Pristina', 'Basel-Mulhouse', True),
+        ('Pristina', 'Stuttgart', True),
+        ('Pristina', 'Düsseldorf', True),
+        ('Pristina', 'München', True),
+        ('Pristina', 'Basel-Mulhouse', False),
+        ('Pristina', 'Stuttgart', False),
+        ('Pristina', 'Düsseldorf', False),
+        ('Pristina', 'München', False),
     ]
 
     city_to_airport_code = {
@@ -54,7 +52,7 @@ def run_airprishtina_ticket_script():
     }
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False)  # Set to True to run headlessly
+        browser = p.chromium.launch(headless=False)
         context = browser.new_context(
             user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
             extra_http_headers={
@@ -65,7 +63,7 @@ def run_airprishtina_ticket_script():
         )
         page = context.new_page()
 
-        for departure, arrival in airport_pairs:
+        for departure, arrival, reversed in airport_pairs:
             for day in range(0, 8):
                 url = 'https://www.airprishtina.com/sq/'
                 page.goto(url)
@@ -73,25 +71,30 @@ def run_airprishtina_ticket_script():
 
                 # Click on the "One Way" option
                 page.click('div.one-way')
-                random_sleep(1)
 
                 print(f"Checking departure: {departure}")
                 page.fill('input#txt_Flight1From', departure)
-                random_sleep(1)
                 page.locator(f'[data-text="{departure}"]').click()
                 random_sleep(1)
-                
+
                 # Populate the "To" input field with the arrival location
                 page.fill('input#txt_Flight1To', arrival)
                 random_sleep(1)
                 page.locator(f'[data-text="{arrival}"]').click()
                 random_sleep(1)
+
+                if reversed:
+                    swap_icon = page.locator('#pnl_Flight1DestinationSwap[data-flight-order="1"] i.fas.fa-sync')
+                    swap_icon.click()
+                    print("Clicked the swap button as 'reversed' is true.")
+                random_sleep(1)
                 
                 target_date_obj = (datetime.now() + timedelta(days=day)).strftime('%Y-%m-%d')
-                formatted_date = (datetime.now() + timedelta(days=day)).strftime('%d-%m')
                 
                 # Click on the date input field to open the date picker
                 page.click('#txt_FromDateText')
+                random_sleep(1)
+
                 target_date = datetime.now() + timedelta(days=day)
                 target_month = target_date.month
                 target_year = target_date.year
@@ -101,11 +104,9 @@ def run_airprishtina_ticket_script():
                 displayed_year = now.year
                 
                 while True:
-                    # Check if the displayed month and year match the target month and year
                     if displayed_year == target_year and displayed_month == target_month:
                         break
                      
-                    # Navigate to the correct month
                     if (displayed_year < target_year) or (displayed_year == target_year and displayed_month < target_month):
                         page.click('th.next.available')
                         displayed_month += 1
@@ -115,45 +116,33 @@ def run_airprishtina_ticket_script():
                             
                 # Select the first matching element
                 div_elements = page.locator(f'td[data-usr-date="{target_date_obj}"]').all()
+                random_sleep(1)
+
                 if div_elements:
-                    # For simplicity, use the first element that matches
                     div_element = div_elements[0]
                     
                     if div_element.is_visible() and div_element.evaluate("element => element.classList.contains('flight-present')"):
                         print("Div has the 'flight-present' class, proceeding to click.")
-                        # Perform the click action
                         div_element.click()
                         random_sleep(3)
         
                         # Click the search button
                         search_button_selector = 'button.btn.btn-red.ac-popup'
                         page.click(search_button_selector)
-                        random_sleep(5)  # Increase sleep time to allow search results to load
-        
-                        try:
-                            load_more_button = page.locator("//button[contains(text(), 'Load more')]")
-                            if load_more_button.is_visible():
-                                load_more_button.click()
-                                random_sleep(2, 3)
-                        except Exception as e:
-                            print(f"Load More button not found or error occurred: {e}")
+                        random_sleep(5)
         
                         page_html = page.content()
                         flights = extract_flight_info(page_html, target_date)
         
-                        # Filter out incomplete flight records
                         complete_flights = [flight for flight in flights if all(flight.values())]
                         
-                        # Translate city names to airport codes
                         tempdeparture = departure
                         temparrival = arrival
                         departure = city_to_airport_code[departure]
                         arrival = city_to_airport_code[arrival]
         
-                        # Save the flight information to the database
                         save_flights(complete_flights, departure, arrival, day, url)
                         
-                        # Restore city names for the next iteration
                         departure = tempdeparture
                         arrival = temparrival
                         print(f"Flight information saved for {departure} to {arrival} on day {day}")
