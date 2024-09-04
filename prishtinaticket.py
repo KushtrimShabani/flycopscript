@@ -45,7 +45,6 @@ def save_flights(flights, from_location, to_location, day, url):
             datetime.now(),
             url
         ))
-        print(f"Inserted flight: {flight}")
 
     conn.commit()
     conn.close()
