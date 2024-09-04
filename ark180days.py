@@ -80,7 +80,7 @@ def run_flyska_ticket_script_180days():
         page = context.new_page()
 
         for departure, arrival in airport_pairs:
-            for day in range(8, 30):
+            for day in range(31, 180):
                 try:
                     url = 'https://prod.flyksa.com/sq'
                     page.goto(url)
