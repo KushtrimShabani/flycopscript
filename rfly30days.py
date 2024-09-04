@@ -79,7 +79,7 @@ def run_flyrbp_ticket_script_30days():
            )
            page = context.new_page()
            for departure, arrival in airport_pairs:
-                 for day in range(10, 14):
+                 for day in range(26, 27):
                      
             
                          url = 'https://www.flyrbp.com'
