@@ -50,7 +50,7 @@ def extract_flight_info(page_html):
     
     return flights
 
-def run_flyrbp_ticket_script_30days():
+def run_flyrbp_ticket_script_180days():
     airport_pairs = [
         ('MLH', 'PRN'),
         ('PRN', 'DUS'),
@@ -135,4 +135,4 @@ def run_flyrbp_ticket_script_30days():
     return {"status": "success", "message": "Flyrbp ticket script executed"}
 
 if __name__ == "__main__":
-    run_flyrbp_ticket_script_30days()
+    run_flyrbp_ticket_script_180days()
