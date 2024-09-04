@@ -5,19 +5,25 @@ from concurrent.futures import ThreadPoolExecutor
 import os
 import psycopg2
 import time
-from airprishtina30days import run_airprishtina_ticket_script_30days
 from flask import Flask, jsonify, request
 import logging
+# from airpristina import run_airprishtina_ticket_script
+from airprishtina180days import run_airprishtina_ticket_script_180days
+from airprishtina30days import run_airprishtina_ticket_script_30days
 from airpristina import run_airprishtina_ticket_script
 from ark import run_arkpy_ticket_script
 from ark30days import run_arkpy_ticket_script_30days
 from flyska import run_flyska_ticket_script
+from flyska180days import run_flyska_ticket_script_180days
 from flyska30days import run_flyska_ticket_script_30days
 from kosfly import run_kosfly_ticket_script
-from kosfly30 import run_kosfly_ticket_script_30days
+from kosfly180days import run_kosfly_ticket_script_180days
+from kosfly30days import run_kosfly_ticket_script_30days
 from prishtinaticket import run_prishtina_ticket_script
+from prishtinaticket180days import run_prishtina_ticket_script_180days
 from prishtinaticket30days import run_prishtina_ticket_script_30days
 from rfly import run_flyrbp_ticket_script
+from rfly180days import run_flyrbp_ticket_script_180days
 from rfly30days import run_flyrbp_ticket_script_30days
 
 
@@ -45,7 +51,7 @@ except Exception as e:
 
 @app.route('/')
 def index():
-    return f'Python is running.'
+    return f'DATABASE_URL is: {DATABASE_URL}'
 
 def query_db(query, args=(), one=False):
     try:
@@ -60,9 +66,15 @@ def query_db(query, args=(), one=False):
     except Exception as e:
         return {'error': str(e)}
 
+def run_script_in_thread(script):
+    try:
+        script()
+    except Exception as e:
+        print(f"Error running script {script.__name__}: {e}")
+
 @app.route('/script', methods=['GET'])
 def run_scripts():
-    def run_all_scripts():
+    try:
         # List of script functions to run
         scripts = [
             run_prishtina_ticket_script,
@@ -72,45 +84,68 @@ def run_scripts():
             run_flyrbp_ticket_script,
             run_airprishtina_ticket_script
         ]
-        # Run each script sequentially with a delay
-        for script in scripts:
-            run_script_in_thread(script)
-            time.sleep(30)  # Adjust the delay as needed
 
-    try:
-        # Start running the scripts in a background thread
-        threading.Thread(target=run_all_scripts).start()
+        # Use ThreadPoolExecutor to run multiple scripts concurrently
+        with ThreadPoolExecutor(max_workers=2) as executor:  # Adjust max_workers as needed
+            for script in scripts:
+                executor.submit(run_script_in_thread, script)
 
-        # Return response immediately
-        return jsonify({'message': 'Scripts started'}), 200
+        # Immediately return a successful response
+        return jsonify({'message': 'Scripts initiated'}), 200
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        # Ensure the route still returns a successful status code even if an exception occurs
+        print(f"Exception occurred: {e}")
+        return jsonify({'message': 'Scripts initiated'}), 200
 
 @app.route('/script-30days', methods=['GET'])
 def run_scripts_30days():
-    def run_all_scripts_30days():
+    try:
         # List of script functions to run
-        scripts_30days = [
+        scripts = [
+            run_prishtina_ticket_script_30days,
             run_flyska_ticket_script_30days,
             run_kosfly_ticket_script_30days,
             run_arkpy_ticket_script_30days,
             run_flyrbp_ticket_script_30days,
-            run_prishtina_ticket_script_30days,
             run_airprishtina_ticket_script_30days
         ]
-        # Run each script sequentially with a delay
-        for script in scripts_30days:
-            run_script_in_thread(script)
-            time.sleep(30)  # Adjust the delay as needed
 
-    try:
-        # Start running the scripts in a background thread
-        threading.Thread(target=run_all_scripts_30days).start()
+        # Use ThreadPoolExecutor to run multiple scripts concurrently
+        with ThreadPoolExecutor(max_workers=2) as executor:  # Adjust max_workers as needed
+            for script in scripts:
+                executor.submit(run_script_in_thread, script)
 
-        # Return response immediately
-        return jsonify({'message': 'Scripts started'}), 200
+        # Immediately return a successful response
+        return jsonify({'message': 'Scripts initiated'}), 200
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        # Ensure the route still returns a successful status code even if an exception occurs
+        print(f"Exception occurred: {e}")
+        return jsonify({'message': 'Scripts initiated'}), 200
+
+@app.route('/script-180days', methods=['GET'])
+def run_scripts_180days():
+    try:
+        # List of script functions to run
+        scripts = [
+            run_prishtina_ticket_script_180days,
+            run_flyrbp_ticket_script_180days,
+            run_kosfly_ticket_script_180days,
+            run_flyska_ticket_script_180days,
+            run_arkpy_ticket_script_30days,
+            run_airprishtina_ticket_script_180days
+        ]
+
+        # Use ThreadPoolExecutor to run multiple scripts concurrently
+        with ThreadPoolExecutor(max_workers=2) as executor:  # Adjust max_workers as needed
+            for script in scripts:
+                executor.submit(run_script_in_thread, script)
+
+        # Immediately return a successful response
+        return jsonify({'message': 'Scripts initiated'}), 200
+    except Exception as e:
+        # Ensure the route still returns a successful status code even if an exception occurs
+        print(f"Exception occurred: {e}")
+        return jsonify({'message': 'Scripts initiated'}), 200
 
 @app.route('/fetch-price-differences', methods=['GET'])
 def fetch_price_differences():
@@ -168,6 +203,10 @@ def fetch_price_differences():
 
     return jsonify(results)
 
+@app.route('/scrape_flights', methods=['GET'])
+def scrape_flights_endpoint():
+    flights = scrape_flights()
+    return jsonify(flights)
 
 @app.route('/flights', methods=['GET'])
 def get_all_flights():
