@@ -112,10 +112,7 @@ def run_flyrbp_ticket_script():
 
                         # Save the flight information
                         save_flights([flight], departure_code, arrival_code, target_date, url)
-                        print(f"Flight: {flight['flight_number']} on {flight['date']} at {flight['time']} for {flight['price']}€ saved.")
                         continue
-                    else:
-                        print("Flight already exists.")
                     
             else:  
                 print("No flights found for the specified date.")
