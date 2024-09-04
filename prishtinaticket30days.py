@@ -126,7 +126,7 @@ def run_prishtina_ticket_script_30days():
             )
         page = context.new_page()
         for departure, arrival in airport_pairs:
-            for day in range(7,30 ,6 ):
+            for day in range(7,35 ,6 ):
                    
                 url = 'https://www.prishtinaticket.net'
                 page.goto(url)
