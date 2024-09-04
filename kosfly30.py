@@ -1,6 +1,8 @@
 from datetime import datetime, timedelta
+import json
 import sys
 import subprocess
+import os
 import random
 import time
 from playwright.sync_api import sync_playwright
@@ -84,7 +86,7 @@ def run_kosfly_ticket_script_30days():
         page = context.new_page()
 
         for departure, arrival in airport_pairs:
-            for day in range(8, 30,5):
+            for day in range(7, 34 , 12):
                 url = 'https://www.kosova-fly.de/'
                 page.goto(url)
                 random_sleep(2, 3)
