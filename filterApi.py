@@ -203,11 +203,6 @@ def fetch_price_differences():
 
     return jsonify(results)
 
-@app.route('/scrape_flights', methods=['GET'])
-def scrape_flights_endpoint():
-    flights = scrape_flights()
-    return jsonify(flights)
-
 @app.route('/flights', methods=['GET'])
 def get_all_flights():
     try:
