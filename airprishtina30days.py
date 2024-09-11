@@ -81,8 +81,7 @@ def run_airprishtina_ticket_script_30days():
                 # Populate the "To" input field with the arrival location
                 page.fill('input#txt_Flight1To', arrival)
                 random_sleep(1)
-                page.locator(f'[data-text="{arrival}"]').click()
-                random_sleep(1)
+              
 
                 if reversed:
                     swap_icon = page.locator('#pnl_Flight1DestinationSwap[data-flight-order="1"] i.fas.fa-sync')
@@ -154,26 +153,18 @@ def run_airprishtina_ticket_script_30days():
                                 response.raise_for_status()  # Raise an exception for HTTP errors
 
                                 if response.status_code == 201 and response.json() is False:
-                                    original_departure = departure
-                                    original_arrival = arrival
-                                    departure = city_to_airport_code.get(departure, departure)
-                                    arrival = city_to_airport_code.get(arrival, arrival)
-
-                                    # Save the flight information
-                                    save_flights([flight], departure, arrival, target_date, url)
-                                    departure = original_departure
-                                    arrival = original_arrival
+                                   original_departure = city_to_airport_code.get(arrival if reversed else departure, arrival if reversed else departure)
+                                   original_arrival = city_to_airport_code.get(departure if reversed else arrival, departure if reversed else arrival)
+                                 
+                                   print(f"Request : {original_departure} edhe arr {original_arrival}")
+                                   save_flights([flight], original_departure, original_arrival, target_date, url)
                             except requests.exceptions.RequestException as e:
                                 print(f"Request failed: {e}")
-                                original_departure = departure
-                                original_arrival = arrival
-                                departure = city_to_airport_code.get(departure, departure)
-                                arrival = city_to_airport_code.get(arrival, arrival)
-
-                            # Save the flight information
-                                save_flights([flight], departure, arrival, target_date, url)
-                                departure = original_departure
-                                arrival = original_arrival
+                                original_departure = city_to_airport_code.get(arrival if reversed else departure, arrival if reversed else departure)
+                                original_arrival = city_to_airport_code.get(departure if reversed else arrival, departure if reversed else arrival)
+                              
+                                print(f"Request : {original_departure} edhe arr {original_arrival}")
+                                save_flights([flight], original_departure, original_arrival, target_date, url)
                             
                     
                     else:
