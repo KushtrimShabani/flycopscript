@@ -73,15 +73,13 @@ def run_airprishtina_ticket_script():
                 # Click on the "One Way" option
                 page.click('div.one-way')
 
-                print(f"Checking departure: {departure}")
+                print(f"Checking departure  : {departure}")
                 page.fill('input#txt_Flight1From', departure)
+                random_sleep(1)
                 page.locator(f'[data-text="{departure}"]').click()
                 random_sleep(1)
-
                 # Populate the "To" input field with the arrival location
                 page.fill('input#txt_Flight1To', arrival)
-                random_sleep(1)
-                page.locator(f'[data-text="{arrival}"]').click()
                 random_sleep(1)
 
                 if reversed:
@@ -156,8 +154,8 @@ def run_airprishtina_ticket_script():
                                 if response.status_code == 201 and response.json() is False:
                                     original_departure = departure
                                     original_arrival = arrival
-                                    departure = city_to_airport_code.get(departure, departure)
-                                    arrival = city_to_airport_code.get(arrival, arrival)
+                                    departure = city_to_airport_code.get(arrival if reversed else departure, arrival if reversed else departure)
+                                    arrival = city_to_airport_code.get(departure if reversed else arrival, departure if reversed else arrival)
 
                                     # Save the flight information
                                     save_flights([flight], departure, arrival, target_date, url)
@@ -167,8 +165,8 @@ def run_airprishtina_ticket_script():
                                 print(f"Request failed: {e}")
                                 original_departure = departure
                                 original_arrival = arrival
-                                departure = city_to_airport_code.get(departure, departure)
-                                arrival = city_to_airport_code.get(arrival, arrival)
+                                departure = city_to_airport_code.get(arrival if reversed else departure, arrival if reversed else departure)
+                                arrival = city_to_airport_code.get(departure if reversed else arrival, departure if reversed else arrival)
 
                             # Save the flight information
                                 save_flights([flight], departure, arrival, target_date, url)
