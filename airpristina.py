@@ -34,14 +34,15 @@ def extract_flight_info(page_html, flight_date):
 
 def run_airprishtina_ticket_script():
     airport_pairs = [
-        ('Pristina', 'Basel-Mulhouse', True),
-        ('Pristina', 'Stuttgart', True),
         ('Pristina', 'Düsseldorf', True),
         ('Pristina', 'München', True),
+        ('Pristina', 'Basel-Mulhouse', True),
+        ('Pristina', 'Stuttgart', True),
         ('Pristina', 'Basel-Mulhouse', False),
         ('Pristina', 'Stuttgart', False),
         ('Pristina', 'Düsseldorf', False),
         ('Pristina', 'München', False),
+
     ]
 
     city_to_airport_code = {
@@ -53,7 +54,7 @@ def run_airprishtina_ticket_script():
     }
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
+        browser = p.chromium.launch(headless=False)
         context = browser.new_context(
             user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
             extra_http_headers={
@@ -152,26 +153,19 @@ def run_airprishtina_ticket_script():
                                 response.raise_for_status()  # Raise an exception for HTTP errors
 
                                 if response.status_code == 201 and response.json() is False:
-                                    original_departure = departure
-                                    original_arrival = arrival
-                                    departure = city_to_airport_code.get(arrival if reversed else departure, arrival if reversed else departure)
-                                    arrival = city_to_airport_code.get(departure if reversed else arrival, departure if reversed else arrival)
-
-                                    # Save the flight information
-                                    save_flights([flight], departure, arrival, target_date, url)
-                                    departure = original_departure
-                                    arrival = original_arrival
+                                   original_departure = city_to_airport_code.get(arrival if reversed else departure, arrival if reversed else departure)
+                                   original_arrival = city_to_airport_code.get(departure if reversed else arrival, departure if reversed else arrival)
+                                 
+                                   print(f"Request : {original_departure} edhe arr {original_arrival}")
+                                   save_flights([flight], original_departure, original_arrival, target_date, url)
                             except requests.exceptions.RequestException as e:
                                 print(f"Request failed: {e}")
-                                original_departure = departure
-                                original_arrival = arrival
-                                departure = city_to_airport_code.get(arrival if reversed else departure, arrival if reversed else departure)
-                                arrival = city_to_airport_code.get(departure if reversed else arrival, departure if reversed else arrival)
-
-                            # Save the flight information
-                                save_flights([flight], departure, arrival, target_date, url)
-                                departure = original_departure
-                                arrival = original_arrival
+                                original_departure = city_to_airport_code.get(arrival if reversed else departure, arrival if reversed else departure)
+                                original_arrival = city_to_airport_code.get(departure if reversed else arrival, departure if reversed else arrival)
+                              
+                                print(f"Request : {original_departure} edhe arr {original_arrival}")
+                                save_flights([flight], original_departure, original_arrival, target_date, url)
+                              
                             
                     
                     else:
