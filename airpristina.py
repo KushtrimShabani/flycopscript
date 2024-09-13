@@ -54,7 +54,7 @@ def run_airprishtina_ticket_script():
     }
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False)
+        browser = p.chromium.launch(headless=True)
         context = browser.new_context(
             user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
             extra_http_headers={
@@ -128,7 +128,7 @@ def run_airprishtina_ticket_script():
                         # Click the search button
                         search_button_selector = 'button.btn.btn-red.ac-popup'
                         page.click(search_button_selector)
-                        random_sleep(5)
+                        random_sleep(8)
         
                         page_html = page.content()
                         flights = extract_flight_info(page_html, formatted_date)
